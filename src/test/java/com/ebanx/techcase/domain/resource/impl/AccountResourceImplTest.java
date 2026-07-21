@@ -90,6 +90,35 @@ class AccountResourceImplTest {
                 .isEqualTo("20");
     }
 
+    @Test
+    @DisplayName("Given a withdraw from a non-existing account when posting event then it should return 404 with body 0")
+    void givenWithdrawFromNonExistingAccountWhenPostEventShouldReturn404() {
+        String body = given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("type", "withdraw", "origin", "2", "amount", 10))
+                .when().post(EVENT_ENDPOINT)
+                .then().statusCode(404)
+                .extract().asString();
+
+        assertThat(body)
+                .as("Withdraw from a non-existing account should return body 0")
+                .isEqualTo("0");
+    }
+
+    @Test
+    @DisplayName("Given an existing account when withdrawing then it should reduce the balance")
+    void givenExistingAccountWhenWithdrawShouldReduceBalance() {
+        deposit("3", 20);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("type", "withdraw", "origin", "3", "amount", 5))
+                .when().post(EVENT_ENDPOINT)
+                .then().statusCode(201)
+                .body("origin.id", is("3"))
+                .body("origin.balance", is(15));
+    }
+
     private void deposit(String accountId, int amount) {
         given()
                 .contentType(ContentType.JSON)

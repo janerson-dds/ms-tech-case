@@ -63,7 +63,19 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private Optional<EventResponse> processWithdraw(EventRequest withdrawEvent) {
-        return Optional.empty();
+        var existingAccount = accountRepository.findById(withdrawEvent.origin());
+        if (existingAccount.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var account = existingAccount.get();
+        if (account.getBalance().compareTo(withdrawEvent.amount()) < 0) {
+            return Optional.empty();
+        }
+
+        account.setBalance(account.getBalance().subtract(withdrawEvent.amount()));
+
+        return Optional.of(accountMapper.mapToWithdrawResponse(accountRepository.save(account)));
     }
 
     private Optional<EventResponse> processTransfer(EventRequest transferEvent) {

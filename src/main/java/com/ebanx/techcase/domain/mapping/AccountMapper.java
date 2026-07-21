@@ -18,4 +18,15 @@ public class AccountMapper {
                 )
                 .build();
     }
+
+    public EventResponse mapToWithdrawResponse(AccountEntity entity) {
+        return EventResponse.builder()
+                .origin(
+                        AccountResponse.builder()
+                                .id(entity.getId())
+                                .balance(entity.getBalance())
+                                .build()
+                )
+                .build();
+    }
 }
