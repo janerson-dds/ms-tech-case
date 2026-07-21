@@ -119,6 +119,37 @@ class AccountResourceImplTest {
                 .body("origin.balance", is(15));
     }
 
+    @Test
+    @DisplayName("Given an existing origin when transferring then it should update origin and destination")
+    void givenExistingOriginWhenTransferShouldUpdateBothAccounts() {
+        deposit("1", 15);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("type", "transfer", "origin", "1", "amount", 15, "destination", "3"))
+                .when().post(EVENT_ENDPOINT)
+                .then().statusCode(201)
+                .body("origin.id", is("1"))
+                .body("origin.balance", is(0))
+                .body("destination.id", is("3"))
+                .body("destination.balance", is(15));
+    }
+
+    @Test
+    @DisplayName("Given a transfer from a non-existing account when posting event then it should return 404 with body 0")
+    void givenTransferFromNonExistingAccountWhenPostEventShouldReturn404() {
+        String body = given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("type", "transfer", "origin", "1234", "amount", 15, "destination", "300"))
+                .when().post(EVENT_ENDPOINT)
+                .then().statusCode(404)
+                .extract().asString();
+
+        assertThat(body)
+                .as("Transfer from a non-existing origin should return body 0")
+                .isEqualTo("0");
+    }
+
     private void deposit(String accountId, int amount) {
         given()
                 .contentType(ContentType.JSON)

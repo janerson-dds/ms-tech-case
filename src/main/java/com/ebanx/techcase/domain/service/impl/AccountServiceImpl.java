@@ -79,6 +79,30 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private Optional<EventResponse> processTransfer(EventRequest transferEvent) {
-        return Optional.empty();
+        var existingOriginAccount = accountRepository.findById(transferEvent.origin());
+        if (existingOriginAccount.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var originAccount = existingOriginAccount.get();
+        if (originAccount.getBalance().compareTo(transferEvent.amount()) < 0) {
+            return Optional.empty();
+        }
+
+        originAccount.setBalance(originAccount.getBalance().subtract(transferEvent.amount()));
+
+        var destinationAccount = accountRepository.findById(transferEvent.destination())
+                .orElseGet(() ->
+                        AccountEntity.builder()
+                                .id(transferEvent.destination())
+                                .balance(BigDecimal.ZERO)
+                                .build()
+                );
+        destinationAccount.setBalance(destinationAccount.getBalance().add(transferEvent.amount()));
+
+        accountRepository.save(originAccount);
+        accountRepository.save(destinationAccount);
+
+        return Optional.of(accountMapper.mapToTransferResponse(originAccount, destinationAccount));
     }
 }

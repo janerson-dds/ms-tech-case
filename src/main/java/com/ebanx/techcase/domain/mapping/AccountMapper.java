@@ -29,4 +29,21 @@ public class AccountMapper {
                 )
                 .build();
     }
+
+    public EventResponse mapToTransferResponse(AccountEntity originEntity, AccountEntity destinationEntity) {
+        return EventResponse.builder()
+                .origin(
+                        AccountResponse.builder()
+                                .id(originEntity.getId())
+                                .balance(originEntity.getBalance())
+                                .build()
+                )
+                .destination(
+                        AccountResponse.builder()
+                                .id(destinationEntity.getId())
+                                .balance(destinationEntity.getBalance())
+                                .build()
+                )
+                .build();
+    }
 }
