@@ -22,7 +22,7 @@ public class AccountResourceImpl implements AccountResource {
     @Override
     public Response reset() {
         accountService.reset();
-        return Response.ok().build();
+        return Response.ok("OK").build();
     }
 
     @Override

@@ -100,9 +100,9 @@ public class AccountServiceImpl implements AccountService {
                 );
         destinationAccount.setBalance(destinationAccount.getBalance().add(transferEvent.amount()));
 
-        accountRepository.save(originAccount);
-        accountRepository.save(destinationAccount);
+        var updatedOriginAccount = accountRepository.save(originAccount);
+        var updatedDestinationAccount = accountRepository.save(destinationAccount);
 
-        return Optional.of(accountMapper.mapToTransferResponse(originAccount, destinationAccount));
+        return Optional.of(accountMapper.mapToTransferResponse(updatedOriginAccount, updatedDestinationAccount));
     }
 }
