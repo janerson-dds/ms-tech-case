@@ -1,5 +1,6 @@
 package com.ebanx.techcase.domain.resource.impl;
 
+import com.ebanx.techcase.domain.dto.request.EventRequest;
 import com.ebanx.techcase.domain.resource.AccountResource;
 import com.ebanx.techcase.domain.service.AccountService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,6 +29,13 @@ public class AccountResourceImpl implements AccountResource {
     public Response getBalance(String accountId) {
         return accountService.getBalance(accountId)
                 .map(balance -> Response.ok(balance).build())
+                .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).entity(BigDecimal.ZERO).build());
+    }
+
+    @Override
+    public Response manageEvent(EventRequest event) {
+        return accountService.manageEvent(event)
+                .map(responseBody -> Response.status(Response.Status.CREATED).entity(responseBody).build())
                 .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).entity(BigDecimal.ZERO).build());
     }
 }

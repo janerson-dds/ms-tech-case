@@ -1,5 +1,7 @@
 package com.ebanx.techcase.domain.resource;
 
+import com.ebanx.techcase.domain.dto.request.EventRequest;
+import com.ebanx.techcase.domain.dto.response.EventResponse;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -10,6 +12,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -65,4 +68,39 @@ public interface AccountResource {
     )
     @Path("/balance")
     Response getBalance(@QueryParam("account_id") String accountId);
+
+    @POST
+    @Operation(
+            summary = "Handle an account event (deposit, withdraw or transfer).",
+            description = "Processes a financial event that changes account balances based on the event."
+    )
+    @RequestBody(
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = EventRequest.class)
+            )
+    )
+    @APIResponses(
+            value = {
+                    @APIResponse(
+                            responseCode = "201",
+                            description = "Event processed successfully; returns the affected account(s).",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = EventResponse.class)
+                            )
+                    ),
+                    @APIResponse(
+                            responseCode = "404",
+                            description = "Origin account does not exist or has insufficient funds; returns 0.",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON,
+                                    schema = @Schema(implementation = BigDecimal.class),
+                                    example = "0"
+                            )
+                    )
+            }
+    )
+    @Path("/event")
+    Response manageEvent(EventRequest event);
 }
